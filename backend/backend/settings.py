@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+import sys
 from dotenv import find_dotenv, load_dotenv
 from pathlib import Path
 from datetime import timedelta
@@ -31,6 +32,49 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,  # сохраняем логи Django по умолчанию
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {name} - {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '[{levelname}] {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+        'storage': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'users': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
 
 ALLOWED_HOSTS = []
 
@@ -146,6 +190,7 @@ AUTH_USER_MODEL = 'users.CustomUser'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
 }
 
