@@ -7,12 +7,14 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import generics, mixins, permissions
+from rest_framework.views import APIView
 from .models import File
 from .serializers import FileSerializer
 from django.shortcuts import get_object_or_404
 
 from django.http import FileResponse
 from django.utils.encoding import smart_str
+from django.utils.timezone import now
 
 class FileUploadView(generics.CreateAPIView):
     queryset = File.objects.all()
@@ -74,7 +76,7 @@ class DownloadFileView(generics.GenericAPIView):
         file = get_object_or_404(File, unique_link=uuid)
         if file.owner != request.user and not request.user.is_admin:
             return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
-        file.last_downloaded_at = timezone.now()
+        file.last_downloaded_at = now()
         file.save()
         response = FileResponse(file.file.open('rb'), as_attachment=True, filename=smart_str(file.original_name))
         return response
@@ -84,7 +86,7 @@ class PublicDownloadView(generics.GenericAPIView):
 
     def get(self, request, uuid):
         file = get_object_or_404(File, unique_link=uuid)
-        file.last_downloaded_at = timezone.now()
+        file.last_downloaded_at = now()
         file.save()
         response = FileResponse(file.file.open('rb'), as_attachment=True, filename=smart_str(file.original_name))
         return response
@@ -98,3 +100,17 @@ class FileListView(generics.ListAPIView):
         if user_id and self.request.user.is_admin:
             return File.objects.filter(owner_id=user_id)
         return File.objects.filter(owner=self.request.user)
+
+class MarkDownloadedView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            file = File.objects.get(pk=pk)
+            if file.owner != request.user and not request.user.is_admin:
+                return Response({"detail": "Нет доступа."}, status=403)
+            file.last_downloaded_at = now()
+            file.save()
+            return Response({"success": True})
+        except File.DoesNotExist:
+            return Response({"detail": "Файл не найден."}, status=404)

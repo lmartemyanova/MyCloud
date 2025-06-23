@@ -4,7 +4,15 @@ from .models import File
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ['id', 'file', 'comment', 'size', 'uploaded_at', 'last_downloaded_at']
+        fields = [
+            'id', 
+            'file', 
+            'comment', 
+            'size', 
+            'uploaded_at', 
+            'last_downloaded_at',
+            'unique_link'
+            ]
         read_only_fields = ['id', 'uploaded_at']
 
     def create(self, validated_data):
