@@ -1,5 +1,9 @@
+import { useState } from "react";
+
 const FileCard = ({ file, onAction }) => {
-    // const downloadUrl = `http://localhost:8000/api/storage/download/${file.uuid}/`;
+    const [editing, setEditing] = useState(false);
+    const [newComment, setNewComment] = useState(file.comment || "");
+
     const publicUrl = `http://localhost:8000/api/storage/public/${file.unique_link}/`;
   
     const handleDelete = async () => {
@@ -31,7 +35,7 @@ const FileCard = ({ file, onAction }) => {
     
         const link = document.createElement("a");
         link.href = url;
-        link.download = file.name;
+        link.download = file.original_name;
         link.click();
         window.URL.revokeObjectURL(url);
     
@@ -49,16 +53,53 @@ const FileCard = ({ file, onAction }) => {
         alert("Не удалось скачать файл");
       }
     };    
+
+    const handleCommentSave = async () => {
+      const res = await fetch(`http://localhost:8000/api/storage/comment/${file.id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ comment: newComment }),
+      });
+  
+      if (res.ok) {
+        setEditing(false);
+        onAction(); // обновим список
+      } else {
+        alert("Не удалось сохранить комментарий");
+      }
+    };
   
     return (
       <div className="file-card">
         <h4>{file.original_name}</h4>
-        <p>Комментарий: {file.comment || "–"}</p>
+
+        {editing ? (
+          <>
+            <input
+              type="text"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+            />
+            <button onClick={handleCommentSave}>💾 Сохранить</button>
+          </>
+        ) : (
+          <p>
+            Комментарий: {file.comment || "–"}{" "}
+            <button onClick={() => setEditing(true)}>✏️</button>
+          </p>
+        )}
+      
         <p>Размер: {(file.size / 1024).toFixed(2)} КБ</p>
         <p>Загружен: {new Date(file.uploaded_at).toLocaleString()}</p>
-        <p>Последнее скачивание: {file.last_downloaded_at ? new Date(file.last_downloaded_at).toLocaleString() : "—"}</p>
+        <p>Последнее скачивание: {file.last_downloaded_at 
+          ? new Date(file.last_downloaded_at).toLocaleString() 
+          : "—"}
+        </p>
         <div className="actions">
-          <button onClick={handleDownload}>Скачать</button>
+          <button onClick={handleDownload}>⬇️ Скачать</button>
           <button onClick={() => navigator.clipboard.writeText(publicUrl)}>🔗 Скопировать ссылку</button>
           <button onClick={handleDelete}>🗑 Удалить</button>
         </div>
