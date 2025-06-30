@@ -26,7 +26,7 @@ const LoginPage = () => {
 
       const data = await res.json();
       localStorage.setItem("token", data.access);
-      navigate("/storage"); //  перенаправть на хранилище
+      navigate("/storage"); 
     } catch {
       setError("Сервер недоступен");
     }

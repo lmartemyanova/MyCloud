@@ -5,6 +5,8 @@ const FileCard = ({ file, onAction }) => {
     const [newComment, setNewComment] = useState(file.comment || "");
 
     const publicUrl = `http://localhost:8000/api/storage/public/${file.unique_link}/`;
+    // const publicUrl = `http://localhost:5173/public/${file.unique_link}`;
+
   
     const handleDelete = async () => {
       const confirmed = window.confirm("Удалить файл?");

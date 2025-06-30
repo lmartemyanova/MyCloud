@@ -1,9 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
 const Navbar = () => {
-  const isAuthenticated = !!localStorage.getItem("token");
-
+    const navigate = useNavigate();
+    const isAuthenticated = !!localStorage.getItem("token");
+  
+    const handleLogout = () => {
+      localStorage.removeItem("token");
+      navigate("/"); // <- перенаправление на главную
+    };
   return (
     <nav className="navbar">
       <Link to="/" className="nav-brand">☁️ My Cloud</Link>
@@ -14,12 +19,7 @@ const Navbar = () => {
             <Link to="/register">Регистрация</Link>
           </>
         ) : (
-          <button onClick={() => {
-            localStorage.removeItem("token");
-            window.location.reload();
-          }}>
-            Выйти
-          </button>
+          <button onClick={handleLogout}>Выйти</button>
         )}
       </div>
     </nav>
