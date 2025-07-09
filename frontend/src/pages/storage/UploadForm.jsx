@@ -22,6 +22,7 @@ const UploadForm = ({ onUpload }) => {
     formData.append("file", file);
     formData.append("comment", comment);
     formData.append("size", parseInt(file.size));
+    formData.append("original_name", file.name);
 
     try {
       const res = await fetch("http://localhost:8000/api/storage/upload/", {

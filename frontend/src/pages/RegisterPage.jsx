@@ -65,9 +65,6 @@ const RegisterPage = () => {
         body: JSON.stringify(body),
       });
 
-      console.log("Status:", res.status);
-      console.log("Raw response:", await res.text());
-
       if (!res.ok) {
         const data = await res.json();
         setServerError(data.detail || "Ошибка регистрации");

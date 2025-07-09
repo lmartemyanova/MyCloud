@@ -9,7 +9,8 @@ from rest_framework.response import Response
 from rest_framework import generics, mixins, permissions
 from rest_framework.views import APIView
 from .models import File
-from .serializers import FileSerializer
+from .serializers import FileSerializer, FileMetadataSerializer
+from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 
 from django.http import FileResponse
@@ -114,3 +115,13 @@ class MarkDownloadedView(APIView):
             return Response({"success": True})
         except File.DoesNotExist:
             return Response({"detail": "Файл не найден."}, status=404)
+        
+@api_view(['GET'])
+def public_file_metadata(request, uuid):
+    try:
+        file = File.objects.get(unique_link=uuid)
+    except File.DoesNotExist:
+        return Response({"detail": "Файл не найден"}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = FileMetadataSerializer(file)
+    return Response(serializer.data)

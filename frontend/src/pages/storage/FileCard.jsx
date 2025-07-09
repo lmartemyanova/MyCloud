@@ -4,8 +4,8 @@ const FileCard = ({ file, onAction }) => {
     const [editing, setEditing] = useState(false);
     const [newComment, setNewComment] = useState(file.comment || "");
 
-    const publicUrl = `http://localhost:8000/api/storage/public/${file.unique_link}/`;
-    // const publicUrl = `http://localhost:5173/public/${file.unique_link}`;
+    // const publicUrl = `http://localhost:8000/api/storage/public/${file.unique_link}/`;
+    const publicUrl = `http://localhost:5173/public/${file.unique_link}`;
 
   
     const handleDelete = async () => {
@@ -33,11 +33,15 @@ const FileCard = ({ file, onAction }) => {
         if (!res.ok) throw new Error("Ошибка скачивания");
     
         const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
+
+        const contentDisposition = res.headers.get("Content-Disposition");
+        const filenameMatch = contentDisposition?.match(/filename="?(.+)"?/);
+        const filename = filenameMatch?.[1] ? decodeURIComponent(filenameMatch[1]) : file.original_name || "downloaded-file";
     
+        const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = file.original_name;
+        link.download = filename;
         link.click();
         window.URL.revokeObjectURL(url);
     
@@ -48,13 +52,12 @@ const FileCard = ({ file, onAction }) => {
           },
         });
     
-        onAction(); 
-      } 
-      catch (err) {
+        onAction();
+      } catch (err) {
         console.error(err);
         alert("Не удалось скачать файл");
       }
-    };    
+    };
 
     const handleCommentSave = async () => {
       const res = await fetch(`http://localhost:8000/api/storage/comment/${file.id}/`, {

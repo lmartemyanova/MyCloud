@@ -1,6 +1,7 @@
 from django.urls import path
 
 from django.urls import path
+from . import views
 from .views import (
     FileUploadView, FileListView, FileDeleteView,
     RenameFileView, UpdateCommentView, DownloadFileView,
@@ -16,4 +17,5 @@ urlpatterns = [
     path('download/<uuid:uuid>/', DownloadFileView.as_view(), name='file-download'),
     path('public/<uuid:uuid>/', PublicDownloadView.as_view(), name='file-public-download'),
     path('mark-downloaded/<int:pk>/', MarkDownloadedView.as_view(), name='mark-downloaded'),
+    path('public/<uuid:uuid>/metadata/', views.public_file_metadata, name='public_file_metadata'),
 ]
