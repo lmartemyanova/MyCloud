@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { extractFilename } from "../../utils/extractFilename";
 
 const FileCard = ({ file, onAction }) => {
     const [editing, setEditing] = useState(false);
@@ -35,8 +36,7 @@ const FileCard = ({ file, onAction }) => {
         const blob = await res.blob();
 
         const contentDisposition = res.headers.get("Content-Disposition");
-        const filenameMatch = contentDisposition?.match(/filename="?(.+)"?/);
-        const filename = filenameMatch?.[1] ? decodeURIComponent(filenameMatch[1]) : file.original_name || "downloaded-file";
+        const filename = extractFilename(contentDisposition, file.original_name || "downloaded-file");
     
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");

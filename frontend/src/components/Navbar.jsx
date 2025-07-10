@@ -4,9 +4,11 @@ import "./Navbar.css";
 const Navbar = () => {
     const navigate = useNavigate();
     const isAuthenticated = !!localStorage.getItem("token");
+    const isAdmin = localStorage.getItem("is_admin") === "true";
   
     const handleLogout = () => {
       localStorage.removeItem("token");
+      localStorage.removeItem("is_admin");
       navigate("/"); // <- перенаправление на главную
     };
   return (
@@ -19,7 +21,11 @@ const Navbar = () => {
             <Link to="/register">Регистрация</Link>
           </>
         ) : (
-          <button onClick={handleLogout}>Выйти</button>
+          <>
+            {isAdmin && <Link to="/admin">Админка</Link>}
+            <Link to="/storage">Хранилище</Link>
+            <button onClick={handleLogout}>Выйти</button>
+          </>
         )}
       </div>
     </nav>

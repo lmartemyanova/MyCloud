@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { extractFilename } from "../utils/extractFilename";
+
 
 const PublicDownloadPage = () => {
   const { uuid } = useParams();
@@ -30,8 +32,7 @@ const PublicDownloadPage = () => {
       const blob = await res.blob();
 
       const contentDisposition = res.headers.get("Content-Disposition");
-      const filenameMatch = contentDisposition?.match(/filename="?(.+)"?/);
-      const filename = filenameMatch?.[1] ? decodeURIComponent(filenameMatch[1]) : "downloaded-file";
+      const filename = extractFilename(contentDisposition, file.original_name || "downloaded-file");
 
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");

@@ -8,7 +8,7 @@ import HomeRedirect from "./pages/HomeRedirect";
 import Navbar from "./components/Navbar";
 import StoragePage from "./pages/storage/StoragePage";
 import PublicDownloadPage from "./pages/PublicDownloadPage";
-
+import AdminPanel from "./pages/AdminPanelPage";
 
 function App() {
   return (
@@ -21,6 +21,7 @@ function App() {
         <Route path="/storage" element={<StoragePage />} />
         <Route path="/" element={<HomeRedirect />} />
         <Route path="/public/:uuid" element={<PublicDownloadPage />} />
+        <Route path="/admin" element={<AdminPanel />} />
         {/* Здесь будут и админ, и файловое хранилище позже */}
       </Routes>
     </Router>

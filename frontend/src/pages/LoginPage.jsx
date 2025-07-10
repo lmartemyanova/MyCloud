@@ -12,7 +12,7 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:8000/api/users/token/", {
+      const res = await fetch("http://localhost:8000/api/users/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -26,6 +26,7 @@ const LoginPage = () => {
 
       const data = await res.json();
       localStorage.setItem("token", data.access);
+      localStorage.setItem("is_admin", data.is_admin);
       navigate("/storage"); 
     } catch {
       setError("Сервер недоступен");
