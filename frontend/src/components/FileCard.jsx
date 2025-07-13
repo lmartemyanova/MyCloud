@@ -17,7 +17,7 @@ const FileCard = ({ file, onAction }) => {
       const confirmed = window.confirm("Удалить файл?");
       if (!confirmed) return;
   
-      await deleteFile(file.id, localStorage.getItem("token"));
+      await deleteFile(file.id);
   
       onAction();
     };
@@ -44,7 +44,7 @@ const FileCard = ({ file, onAction }) => {
         link.click();
         window.URL.revokeObjectURL(url);
     
-        await markAsDownloaded(file.id, localStorage.getItem("token"));
+        await markAsDownloaded(file.id);
     
         onAction();
       } catch (err) {
@@ -55,7 +55,7 @@ const FileCard = ({ file, onAction }) => {
 
     const handleCommentSave = async () => {
       try {
-        await updateComment(file.id, newComment, localStorage.getItem("token"));
+        await updateComment(file.id, newComment);
           setEditing(false);
           onAction();
         } catch {

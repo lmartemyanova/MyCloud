@@ -1,7 +1,10 @@
 import { request } from './api';
 
-export const uploadFile = async (formData, token) => {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/storage/upload/`, {
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
+export const uploadFile = async (formData) => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_BASE_URL}/storage/upload/`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -10,6 +13,8 @@ export const uploadFile = async (formData, token) => {
   });
 
   if (!response.ok) {
+    const text = await response.text();
+    console.error("Ошибка загрузки:", text);
     throw new Error('Ошибка при загрузке файла');
   }
 

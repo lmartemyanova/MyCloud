@@ -21,7 +21,15 @@ export const request = async (endpoint, method = 'GET', data = null, token = nul
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-  const result = await response.json();
+
+  const text = await response.text();
+  let result = null;
+  try {
+    result = text ? JSON.parse(text) : null;
+  } catch (err) {
+    console.warn("Не удалось распарсить JSON:", err);
+    result = null;
+  }
 
   if (!response.ok) {
     throw new Error(result.detail || 'Произошла ошибка');

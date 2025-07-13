@@ -9,14 +9,33 @@ import {
 const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState("full_name");
+  const [sortOrder, setSortOrder] = useState("asc");
+
   const navigate = useNavigate();
 
   const fetchUsers = async () => {
     try {
-      // const token = localStorage.getItem("token");
-      // const data = await getAllUsers(token);
       const data = await getAllUsers();
-      setUsers(data);
+      const sorted = [...data].sort((a, b) => {
+        let valA = a[sortBy];
+        let valB = b[sortBy];
+  
+        if (sortBy === "full_name") {
+          valA = a.full_name?.toLowerCase();
+          valB = b.full_name?.toLowerCase();
+        }
+  
+        if (sortBy === "is_admin") {
+          valA = a.is_admin ? 1 : 0;
+          valB = b.is_admin ? 1 : 0;
+        }
+  
+        if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+        if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+        return 0;
+      });
+      setUsers(sorted);
     } catch (err) {
       console.error(err);
       alert("Ошибка загрузки пользователей");
@@ -27,12 +46,10 @@ const AdminPanel = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [sortBy, sortOrder]);
 
   const toggleAdmin = async (id) => {
     try {
-      // const token = localStorage.getItem("token");
-      // await toggleAdminStatus(id, token);
       await toggleAdminStatus(id);
       fetchUsers();
     } catch (err) {
@@ -45,8 +62,6 @@ const AdminPanel = () => {
     if (!window.confirm("Удалить пользователя?")) return;
 
     try {
-      // const token = localStorage.getItem("token");
-      // await deleteUserById(id, token);
       await deleteUserById(id);
       fetchUsers();
     } catch (err) {
@@ -64,6 +79,23 @@ const AdminPanel = () => {
   return (
     <div style={{ padding: "2rem" }}>
       <h2>👑 Панель администратора</h2>
+      <div style={{ marginBottom: "1rem" }}>
+        <label>
+          Сортировка:{" "}
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <option value="full_name">По имени</option>
+            <option value="storage_size">По размеру хранилища</option>
+            <option value="is_admin">По статусу администратора</option>
+          </select>
+        </label>{" "}
+        <label>
+          Порядок:{" "}
+          <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+            <option value="asc">↑ по возрастанию</option>
+            <option value="desc">↓ по убыванию</option>
+          </select>
+        </label>
+      </div>
       <table border="1" cellPadding="10" style={{ width: "100%", marginTop: "1rem" }}>
         <thead>
           <tr>
