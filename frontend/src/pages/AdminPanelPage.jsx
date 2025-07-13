@@ -5,6 +5,7 @@ import {
   deleteUserById,
   toggleAdminStatus,
 } from "../services/users";
+import "../styles/admin.css";
 
 const AdminPanel = () => {
   const [users, setUsers] = useState([]);
@@ -77,9 +78,9 @@ const AdminPanel = () => {
   if (loading) return <p>Загрузка...</p>;
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div className="admin-panel">
       <h2>👑 Панель администратора</h2>
-      <div style={{ marginBottom: "1rem" }}>
+      <div className="controls">
         <label>
           Сортировка:{" "}
           <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
@@ -96,7 +97,7 @@ const AdminPanel = () => {
           </select>
         </label>
       </div>
-      <table border="1" cellPadding="10" style={{ width: "100%", marginTop: "1rem" }}>
+      <table border="1" cellPadding="10">
         <thead>
           <tr>
             <th>Имя</th>

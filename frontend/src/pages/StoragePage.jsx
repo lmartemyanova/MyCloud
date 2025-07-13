@@ -2,8 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import FileCard from "../components/FileCard";
 import UploadForm from "../components/UploadForm";
-import "../styles/storage.css";
 import { getFiles, getUserFiles } from "../services/files";
+import "../styles/storage.css";
 
 const StoragePage = () => {
   const [files, setFiles] = useState([]);
@@ -58,21 +58,23 @@ const StoragePage = () => {
       <h2>{userId ? "📁 Хранилище пользователя" : "📂 Мои файлы"}</h2>
       {!userId && <UploadForm onUpload={fetchFiles} />}
       {error && <p className="error">{error}</p>}
-      <label>
-        Сортировка:{" "}
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-          <option value="uploaded_at">По дате загрузки</option>
-          <option value="original_name">По имени</option>
-          <option value="size">По размеру</option>
-        </select>
-      </label>
-      <label>
-        Порядок:{" "}
-        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-          <option value="asc">↑ по возрастанию</option>
-          <option value="desc">↓ по убыванию</option>
-        </select>
-      </label>
+      <div className="sorting">
+        <label>
+          Сортировка:{" "}
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <option value="uploaded_at">По дате загрузки</option>
+            <option value="original_name">По имени</option>
+            <option value="size">По размеру</option>
+          </select>
+        </label>
+        <label>
+          Порядок:{" "}
+          <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+            <option value="asc">↑ по возрастанию</option>
+            <option value="desc">↓ по убыванию</option>
+          </select>
+        </label>
+      </div>
       <div className="file-list">
         {files.length > 0 ? (
           files.map((file) => (

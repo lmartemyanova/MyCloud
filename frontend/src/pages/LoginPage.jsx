@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, getProfile } from "../services/auth";
+import "../styles/form.css";
 
 const LoginPage = () => {
   const [form, setForm] = useState({ username: "", password: "" });

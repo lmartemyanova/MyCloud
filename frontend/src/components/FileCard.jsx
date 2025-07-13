@@ -5,6 +5,7 @@ import {
   updateComment,
   markAsDownloaded
 } from "../services/files";
+import "../styles/storage.css";
 
 const FileCard = ({ file, onAction }) => {
     const [editing, setEditing] = useState(false);

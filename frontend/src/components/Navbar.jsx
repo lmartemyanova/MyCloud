@@ -11,6 +11,7 @@ const Navbar = () => {
     localStorage.removeItem("is_admin");
     navigate("/"); // <- перенаправление на главную
   };
+  
   return (
     <nav className="navbar">
       <Link to="/" className="nav-brand">☁️ My Cloud</Link>

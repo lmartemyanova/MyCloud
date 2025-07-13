@@ -9,6 +9,10 @@
   border-radius: 8px;
 }
 
+.upload-form input[type="text"] {
+  margin-top: 0.5rem;
+}
+
 .drop-zone {
   border: 2px dashed #aaa;
   padding: 1rem;
@@ -31,4 +35,26 @@
 
 .error {
   color: red;
+}
+
+.file-card h4 {
+  margin-bottom: 0.5rem;
+}
+
+.file-card p {
+  margin: 0.25rem 0;
+}
+
+.sorting {
+  margin-top: 2rem;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.sorting label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }

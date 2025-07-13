@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { extractFilename } from "../utils/extractFilename";
 import { getPublicFileMetadata } from "../services/files";
+import "../styles/public.css";
 
 
 const PublicDownloadPage = () => {
@@ -49,7 +50,7 @@ const PublicDownloadPage = () => {
   if (!file) return <div>Загрузка...</div>;
 
   return (
-    <div style={{ padding: "2rem", textAlign: "center" }}>
+    <div className="public-download">
       <h2>📄 {file.original_name}</h2>
       <p>Комментарий: {file.comment || "—"}</p>
       <p>Размер: {(file.size / 1024).toFixed(2)} КБ</p>

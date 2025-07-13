@@ -1,0 +1,23 @@
+.admin-panel {
+  padding: 2rem;
+}
+
+.admin-panel .controls {
+  margin-bottom: 1rem;
+}
+
+.admin-panel table {
+  width: 100%;
+  margin-top: 1rem;
+  border-collapse: collapse;
+}
+
+.admin-panel th,
+.admin-panel td {
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.admin-panel button {
+  margin-right: 0.5rem;
+}

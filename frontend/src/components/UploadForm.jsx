@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { uploadFile } from "../services/files";
+import "../styles/storage.css";
 
 const UploadForm = ({ onUpload }) => {
   const [file, setFile] = useState(null);

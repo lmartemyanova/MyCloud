@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/form.css";
 import { register } from "../services/auth";
+import "../styles/form.css";
 
 const RegisterPage = () => {
   const [form, setForm] = useState({
