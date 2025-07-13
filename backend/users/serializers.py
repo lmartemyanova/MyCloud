@@ -3,7 +3,6 @@ from .models import CustomUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.db.models import Sum
-from django.contrib.auth import get_user_model
 from storage.models import File
 
 

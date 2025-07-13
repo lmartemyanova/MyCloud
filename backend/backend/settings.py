@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 import sys
-from dotenv import find_dotenv, load_dotenv
 import environ
 from pathlib import Path
 from datetime import timedelta
@@ -27,7 +26,6 @@ env = environ.Env(
 )
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# load_dotenv(find_dotenv())
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -40,7 +38,7 @@ DEBUG = env.bool("DEBUG")
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,  # сохраняем логи Django по умолчанию
+    'disable_existing_loggers': False, 
     'formatters': {
         'verbose': {
             'format': '[{levelname}] {asctime} {name} - {message}',

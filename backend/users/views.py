@@ -5,7 +5,6 @@ from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAdminUser
 from django.contrib.auth import get_user_model
-from rest_framework.decorators import api_view, permission_classes
 from storage.models import File
 from django.shortcuts import get_object_or_404
 

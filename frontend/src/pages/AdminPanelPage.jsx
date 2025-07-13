@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const getAccessToken = () => localStorage.getItem("token");
+import {
+  getAllUsers,
+  deleteUserById,
+  toggleAdminStatus,
+} from "../services/users";
 
 const AdminPanel = () => {
   const [users, setUsers] = useState([]);
@@ -10,15 +13,9 @@ const AdminPanel = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/users/users/", {
-        headers: {
-          Authorization: `Bearer ${getAccessToken()}`,
-        }
-      });
-
-      if (!res.ok) throw new Error("Ошибка загрузки пользователей");
-
-      const data = await res.json();
+      // const token = localStorage.getItem("token");
+      // const data = await getAllUsers(token);
+      const data = await getAllUsers();
       setUsers(data);
     } catch (err) {
       console.error(err);
@@ -34,19 +31,13 @@ const AdminPanel = () => {
 
   const toggleAdmin = async (id) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/users/users/${id}/toggle-admin/`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${getAccessToken()}`,
-        }
-      });
-      if (res.ok) {
-        fetchUsers();
-      } else {
-        alert("Не удалось изменить статус администратора");
-      }
+      // const token = localStorage.getItem("token");
+      // await toggleAdminStatus(id, token);
+      await toggleAdminStatus(id);
+      fetchUsers();
     } catch (err) {
       console.error(err);
+      alert("Не удалось изменить статус администратора");
     }
   };
 
@@ -54,19 +45,13 @@ const AdminPanel = () => {
     if (!window.confirm("Удалить пользователя?")) return;
 
     try {
-      const res = await fetch(`http://localhost:8000/api/users/users/${id}/`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${getAccessToken()}`,
-        }
-      });
-      if (res.ok) {
-        fetchUsers();
-      } else {
-        alert("Ошибка удаления");
-      }
+      // const token = localStorage.getItem("token");
+      // await deleteUserById(id, token);
+      await deleteUserById(id);
+      fetchUsers();
     } catch (err) {
       console.error(err);
+      alert("Ошибка удаления");
     }
   };
 

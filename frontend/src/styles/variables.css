@@ -1,0 +1,9 @@
+:root {
+  --bg: #f9f9f9;
+  --text: #1a1a1a;
+  --primary: #3f51b5;
+  --danger: #e53935;
+  --success: #43a047;
+  --border-radius: 8px;
+  --spacing: 1rem;
+}

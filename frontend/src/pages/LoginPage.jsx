@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { login, getProfile } from "../services/auth";
 
 const LoginPage = () => {
   const [form, setForm] = useState({ username: "", password: "" });
@@ -12,21 +13,11 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:8000/api/users/login/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.detail || "Ошибка авторизации");
-        return;
-      }
-
-      const data = await res.json();
+      const data = await login({ username: form.username, password: form.password });
       localStorage.setItem("token", data.access);
-      localStorage.setItem("is_admin", data.is_admin);
+
+      const profile = await getProfile(data.access);
+      localStorage.setItem("is_admin", profile.is_admin);
       navigate("/storage"); 
     } catch {
       setError("Сервер недоступен");

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/form.css";
+import { register } from "../services/auth";
 
 const RegisterPage = () => {
   const [form, setForm] = useState({
@@ -53,27 +54,18 @@ const RegisterPage = () => {
     }
 
     try {
-      const body = {
+      await register({
         username: form.username,
         password: form.password,
-        full_name: form.fullName, // здесь вручную переименовываешь
+        full_name: form.fullName,
         email: form.email,
-      };
-      const res = await fetch("http://localhost:8000/api/users/register/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
       });
-
-      if (!res.ok) {
-        const data = await res.json();
-        setServerError(data.detail || "Ошибка регистрации");
-        return;
-      }
 
       navigate("/login");
     } catch (error) {
-      setServerError("Ошибка подключения к серверу");
+      setServerError(
+        error?.response?.data?.detail || "Ошибка при регистрации"
+      );
     }
   };
 

@@ -1,11 +1,15 @@
 import { useState } from "react";
-import { extractFilename } from "../../utils/extractFilename";
+import { extractFilename } from "../utils/extractFilename";
+import {
+  deleteFile,
+  updateComment,
+  markAsDownloaded
+} from "../services/files";
 
 const FileCard = ({ file, onAction }) => {
     const [editing, setEditing] = useState(false);
     const [newComment, setNewComment] = useState(file.comment || "");
 
-    // const publicUrl = `http://localhost:8000/api/storage/public/${file.unique_link}/`;
     const publicUrl = `http://localhost:5173/public/${file.unique_link}`;
 
   
@@ -13,12 +17,7 @@ const FileCard = ({ file, onAction }) => {
       const confirmed = window.confirm("Удалить файл?");
       if (!confirmed) return;
   
-      await fetch(`http://localhost:8000/api/storage/delete/${file.id}/`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      await deleteFile(file.id, localStorage.getItem("token"));
   
       onAction();
     };
@@ -45,12 +44,7 @@ const FileCard = ({ file, onAction }) => {
         link.click();
         window.URL.revokeObjectURL(url);
     
-        await fetch(`http://localhost:8000/api/storage/mark-downloaded/${file.id}/`, {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        await markAsDownloaded(file.id, localStorage.getItem("token"));
     
         onAction();
       } catch (err) {
@@ -60,21 +54,13 @@ const FileCard = ({ file, onAction }) => {
     };
 
     const handleCommentSave = async () => {
-      const res = await fetch(`http://localhost:8000/api/storage/comment/${file.id}/`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ comment: newComment }),
-      });
-  
-      if (res.ok) {
-        setEditing(false);
-        onAction(); // обновим список
-      } else {
-        alert("Не удалось сохранить комментарий");
-      }
+      try {
+        await updateComment(file.id, newComment, localStorage.getItem("token"));
+          setEditing(false);
+          onAction();
+        } catch {
+          alert("Не удалось сохранить комментарий");
+        }
     };
   
     return (

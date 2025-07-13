@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import FileCard from "./FileCard";
-import UploadForm from "./UploadForm";
-import "./storage.css";
+import FileCard from "../components/FileCard";
+import UploadForm from "../components/UploadForm";
+import "../styles/storage.css";
+import { getFiles, getUserFiles } from "../services/files";
 
 const StoragePage = () => {
   const [files, setFiles] = useState([]);
@@ -12,20 +13,14 @@ const StoragePage = () => {
   const userId = queryParams.get("user_id");
 
   const fetchFiles = async () => {
-    const url = userId
-      ? `http://localhost:8000/api/storage/user-files/?user_id=${userId}`
-      : `http://localhost:8000/api/storage/my-files/`;
 
     try {
-      const res = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Требуется авторизация");
+      const data = userId
+        ? await getUserFiles(token, userId)
+        : await getFiles(token);
 
-      if (!res.ok) throw new Error("Ошибка при загрузке файлов");
-
-      const data = await res.json();
       setFiles(data);
     } catch (err) {
       setError(err.message);

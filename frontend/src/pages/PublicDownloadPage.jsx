@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { extractFilename } from "../utils/extractFilename";
+import { getPublicFileMetadata } from "../services/files";
 
 
 const PublicDownloadPage = () => {
@@ -11,9 +12,7 @@ const PublicDownloadPage = () => {
   useEffect(() => {
     const fetchFile = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/storage/public/${uuid}/metadata/`);
-        if (!res.ok) throw new Error("Файл не найден");
-        const data = await res.json();
+        const data = await getPublicFileMetadata(uuid);
         setFile(data);
       } catch (err) {
         setError("Файл не найден или недоступен");

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { uploadFile } from "../services/files";
 
 const UploadForm = ({ onUpload }) => {
   const [file, setFile] = useState(null);
@@ -25,23 +26,14 @@ const UploadForm = ({ onUpload }) => {
     formData.append("original_name", file.name);
 
     try {
-      const res = await fetch("http://localhost:8000/api/storage/upload/", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("Ошибка загрузки");
-
-      setFile(null);
-      setComment("");
-      onUpload();
-    } catch (err) {
-      console.error(err);
-      setError("Не удалось загрузить файл");
-    }
+        await uploadFile(formData);
+        setFile(null);
+        setComment("");
+        onUpload();
+      } catch (err) {
+        console.error(err);
+        setError("Не удалось загрузить файл");
+      }
   };
 
   return (

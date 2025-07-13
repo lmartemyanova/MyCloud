@@ -1,12 +1,9 @@
-from django.shortcuts import render
-
 # Create your views here.
 import os
 
 from rest_framework import status
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import generics, mixins, permissions
+from rest_framework import generics, permissions
 from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 from .models import File
@@ -28,7 +25,6 @@ class FileUploadView(generics.CreateAPIView):
     def perform_create(self, serializer):
         user = self.request.user
         if not user.storage_path:
-            # Пример: storage/username/
             user.storage_path = os.path.join('storage', user.username)
             user.save()
         serializer.save(owner=user)

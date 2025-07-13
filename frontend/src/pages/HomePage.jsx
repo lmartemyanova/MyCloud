@@ -1,5 +1,3 @@
-// import logo
-
 export default function HomePage() {
     return (
       <section>
