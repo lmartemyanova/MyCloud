@@ -3,13 +3,21 @@ import { extractFilename } from "../utils/extractFilename";
 import {
   deleteFile,
   updateComment,
-  markAsDownloaded
+  markAsDownloaded,
+  renameFile 
 } from "../services/files";
 import "../styles/storage.css";
+import FilePreview from "./FilePreview";
+import { preserveFileExtension } from "../utils/filename";
 
 const FileCard = ({ file, onAction }) => {
-    const [editing, setEditing] = useState(false);
+    const [editingName, setEditingName] = useState(false);
+    const [newName, setNewName] = useState(file.original_name);
+    
+    const [editingComment, setEditingComment] = useState(false);
     const [newComment, setNewComment] = useState(file.comment || "");
+
+    const [previewOpen, setPreviewOpen] = useState(false);
 
     const publicUrl = `http://localhost:5173/public/${file.unique_link}`;
 
@@ -22,6 +30,7 @@ const FileCard = ({ file, onAction }) => {
   
       onAction();
     };
+
 
     const handleDownload = async () => {
       try {
@@ -54,21 +63,57 @@ const FileCard = ({ file, onAction }) => {
       }
     };
 
+
+    const handleRename = async () => {
+      try {
+        const fixedName = preserveFileExtension(file.original_name, newName);
+        await renameFile(file.id, fixedName);
+        setEditingName(false);
+        onAction();
+      } catch {
+        alert("Не удалось переименовать файл");
+      }
+    };
+
+
     const handleCommentSave = async () => {
       try {
         await updateComment(file.id, newComment);
-          setEditing(false);
+          setEditingComment(false);
           onAction();
         } catch {
           alert("Не удалось сохранить комментарий");
         }
     };
   
+
     return (
       <div className="file-card">
-        <h4>{file.original_name}</h4>
+        {editingName ? (
+          <>
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
+            <button onClick={handleRename}>💾 Сохранить</button>
+            <button
+              onClick={() => {
+                setEditingName(false);
+                setNewName(file.original_name); 
+              }}
+            >
+              ✖
+            </button>
+          </>
+        ) : (
+          <h4>
+            {file.original_name}{" "}
+            <button onClick={() => setEditingName(true)}>✏️</button>
+          </h4>
+        )}
 
-        {editing ? (
+        {editingComment ? (
           <>
             <input
               type="text"
@@ -76,11 +121,19 @@ const FileCard = ({ file, onAction }) => {
               onChange={(e) => setNewComment(e.target.value)}
             />
             <button onClick={handleCommentSave}>💾 Сохранить</button>
+            <button
+              onClick={() => {
+                setEditingComment(false);
+                setNewComment(file.comment);
+              }}
+            >
+              ✖
+            </button>
           </>
         ) : (
           <p>
             Комментарий: {file.comment || "–"}{" "}
-            <button onClick={() => setEditing(true)}>✏️</button>
+            <button onClick={() => setEditingComment(true)}>✏️</button>
           </p>
         )}
       
@@ -91,6 +144,15 @@ const FileCard = ({ file, onAction }) => {
           : "—"}
         </p>
         <div className="actions">
+        
+          <button onClick={() => setPreviewOpen(true)}>👁 Предпросмотр</button>
+          {previewOpen && (
+            <div className="preview-modal">
+              <button onClick={() => setPreviewOpen(false)}>❌ Закрыть</button>
+              <FilePreview file={file} isPublic={false} />
+            </div>
+          )}
+
           <button onClick={handleDownload}>⬇️ Скачать</button>
           <button onClick={() => navigator.clipboard.writeText(publicUrl)}>🔗 Скопировать ссылку</button>
           <button onClick={handleDelete}>🗑 Удалить</button>

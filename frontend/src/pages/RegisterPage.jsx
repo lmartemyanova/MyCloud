@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { register } from "../services/auth";
 import "../styles/form.css";
+import { validateRegisterForm } from "../utils/validate";
 
 const RegisterPage = () => {
   const [form, setForm] = useState({
@@ -15,31 +16,6 @@ const RegisterPage = () => {
   const [serverError, setServerError] = useState("");
   const navigate = useNavigate();
 
-  const validate = () => {
-    const errs = {};
-
-    if (!/^[a-zA-Z][a-zA-Z0-9]{3,19}$/.test(form.username)) {
-      errs.username = "Логин: латиница, от 4 до 20 символов, начинается с буквы";
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      errs.email = "Неверный формат email";
-    }
-
-    if (
-      !/^(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{6,}$/.test(form.password)
-    ) {
-      errs.password =
-        "Пароль: ≥6 символов, 1 заглавная, 1 цифра, 1 спецсимвол";
-    }
-
-    if (!form.fullName.trim()) {
-      errs.fullName = "Укажите полное имя";
-    }
-
-    return errs;
-  };
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
@@ -47,7 +23,7 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const errs = validate();
+    const errs = validateRegisterForm(form);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;

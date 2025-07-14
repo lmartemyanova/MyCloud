@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { extractFilename } from "../utils/extractFilename";
 import { getPublicFileMetadata } from "../services/files";
+import FilePreview from "../components/FilePreview";
 import "../styles/public.css";
 
 
@@ -9,6 +10,7 @@ const PublicDownloadPage = () => {
   const { uuid } = useParams();
   const [file, setFile] = useState(null);
   const [error, setError] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     const fetchFile = async () => {
@@ -54,7 +56,17 @@ const PublicDownloadPage = () => {
       <h2>📄 {file.original_name}</h2>
       <p>Комментарий: {file.comment || "—"}</p>
       <p>Размер: {(file.size / 1024).toFixed(2)} КБ</p>
+      <div className="actions">
+      <button onClick={() => setPreviewOpen(true)}>👁 Предпросмотр</button>
+        {previewOpen && (
+          <div className="preview-modal">
+            <button onClick={() => setPreviewOpen(false)}>❌ Закрыть</button>
+            <FilePreview file={file} isPublic={true} />
+          </div>
+        )}
+
       <button onClick={handleDownload}>⬇️ Скачать файл</button>
+      </div>
     </div>
   );
 };

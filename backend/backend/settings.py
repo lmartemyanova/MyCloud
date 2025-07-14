@@ -106,6 +106,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "corsheaders.middleware.CorsMiddleware",
+    'storage.middleware.AllowIframeMiddleware',
 ]
 
 MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')

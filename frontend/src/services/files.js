@@ -28,7 +28,7 @@ export const deleteFile = (id, token) =>
   request(`/storage/delete/${id}/`, 'DELETE', null, token);
 
 export const renameFile = (id, name, token) =>
-  request(`/storage/rename/${id}/`, 'PATCH', { name }, token);
+  request(`/storage/rename/${id}/`, 'PATCH', { original_name: name }, token);
 
 export const updateComment = (id, comment, token) =>
   request(`/storage/comment/${id}/`, 'PATCH', { comment }, token);

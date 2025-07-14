@@ -34,5 +34,6 @@ class FileMetadataSerializer(serializers.ModelSerializer):
             'comment', 
             'size', 
             'uploaded_at', 
-            'last_downloaded_at'
+            'last_downloaded_at',
+            'unique_link',
         ]

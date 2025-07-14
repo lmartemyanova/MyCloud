@@ -30,20 +30,15 @@ class FileUploadView(generics.CreateAPIView):
         serializer.save(owner=user)
 
 
-class FileListView(generics.ListAPIView):
-    serializer_class = FileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return File.objects.filter(owner=self.request.user)
-
-
 class FileDeleteView(generics.DestroyAPIView):
     serializer_class = FileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return File.objects.filter(owner=self.request.user)
+        user = self.request.user
+        if user.is_staff:
+            return File.objects.all()
+        return File.objects.filter(owner=user)
     
 
 class RenameFileView(generics.UpdateAPIView):
@@ -53,10 +48,15 @@ class RenameFileView(generics.UpdateAPIView):
 
     def patch(self, request, pk):
         file = get_object_or_404(File, pk=pk)
-        if file.owner != request.user and not request.user.is_admin:
+
+        if file.owner != request.user and not request.user.is_staff:
             return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
-        file.original_name = request.data.get('original_name', file.original_name)
-        file.save()
+
+        new_name = request.data.get('original_name')
+        if new_name:
+            file.original_name = new_name
+            file.save()
+
         return Response({'original_name': file.original_name})
 
 
@@ -116,6 +116,35 @@ class FileListView(generics.ListAPIView):
         if user_id and self.request.user.is_admin:
             return File.objects.filter(owner_id=user_id)
         return File.objects.filter(owner=self.request.user)
+    
+
+class FilePreviewView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, uuid):
+        file = get_object_or_404(File, unique_link=uuid)
+        if file.owner != request.user and not request.user.is_admin:
+            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
+        response = FileResponse(file.file.open('rb'), as_attachment=False)
+        response['Content-Disposition'] = f'inline; filename="{smart_str(file.original_name)}"'
+        return response
+    
+
+class PublicPreviewView(generics.GenericAPIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, uuid):
+        file = get_object_or_404(File, unique_link=uuid)
+        file.last_downloaded_at = now()
+        file.save()
+
+        response = FileResponse(file.file.open('rb'), as_attachment=False)
+        response['Content-Disposition'] = (
+            f'inline; filename="{smart_str(file.original_name)}"; '
+            f"filename*=UTF-8''{quote(file.original_name)}"
+        )
+        return response
 
 
 class MarkDownloadedView(APIView):
