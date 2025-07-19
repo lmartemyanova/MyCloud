@@ -5,6 +5,7 @@ import { getPublicFileMetadata } from "../services/files";
 import FilePreview from "../components/FilePreview";
 import "../styles/public.css";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 const PublicDownloadPage = () => {
   const { uuid } = useParams();
@@ -28,7 +29,7 @@ const PublicDownloadPage = () => {
 
   const handleDownload = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/storage/public/${uuid}`);
+      const res = await fetch(`${API_BASE_URL}/storage/public/${uuid}`);
       if (!res.ok) throw new Error("Ошибка скачивания");
 
       const blob = await res.blob();

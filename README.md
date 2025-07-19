@@ -209,6 +209,8 @@ yarn install
 
 ```env
 VITE_API_URL=http://127.0.0.1:8000/api
+VITE_FRONTEND_URL=http://localhost:5173
+# обратить внимание - данное содержимое .env только для локальной разработки - в продакшене будут другие переменные!
 ```
 
 Запустите фронтенд в режиме разработки:
@@ -252,3 +254,387 @@ http://localhost:5173
 - `/register` — Регистрация
 - `/admin` — Фронтенд-админка
 - `/public/:uuid` — Просмотр файла по публичной ссылке
+
+---
+
+# 🚀 Развёртывание Django-проекта на облачном сервере
+
+### Инструкция по развертыванию проекта MyCloud на облачном сервере Reg.ru.
+
+## 1. Создание сервера
+
+Зарегистрируйтесь на [reg.ru](https://www.reg.ru/).
+
+Перейдите в личный кабинет → вкладка Рег.облако → Создать сервер.
+
+**Выбор параметров:**
+
+- Образ: Ubuntu
+- Тариф и конфигурация: по требованиям проекта
+- Регион размещения: любой
+- Настройки сети:
+- Плавающий (публичный) адрес — оставить
+- Резервное копирование — опционально
+- SSH-ключ:
+    - Если ключа нет — создаем:
+    - ```ssh-keygen``` (далее просто нажимаем Enter — ключи появятся в ```~/.ssh/id_rsa``` и ```~/.ssh/id_rsa.pub)```.
+    - Найдите в терминале строчку ```Your public key has been saved in /c/Users/user/.ssh/id_rsa.pub```. Здесь важен путь, по которому сохранился ключ. Скопируйте окончание пути, начиная с ```/.ssh/```. 
+    - Открываем ```.ssh/id_rsa.pub```, копируем его содержимое.
+    - Ключ будет в ```C:\Users\User\.ssh\id_rsa.pub``` (Windows) или ```~/.ssh/id_rsa.pub``` (Linux/macOS)
+    - Либо можно скопировать публичный ключ в терминале: ```cat ~/.ssh/id_rsa.pub```
+
+После создания получим на почту:
+
+- IP-адрес сервера
+- Root-доступ
+
+## 2. Подключение к серверу
+
+### 2.1 Войти под root
+
+```bash
+ssh root@your_server_ip
+```
+
+### 2.2 Создать нового пользователя
+
+```bash
+adduser your_username
+usermod -aG sudo your_username
+logout
+```
+
+### 2.3 Войти под новым пользователем
+
+```bash
+ssh your_username@your_server_ip
+```
+
+## 3. Подготовка окружения
+
+### 3.1 Обновление и установка зависимостей
+
+```bash
+sudo apt update
+sudo apt upgrade
+sudo apt install python3-venv python3-pip postgresql
+```
+
+### 3.2 Клонировать проект
+
+```bash
+git clone https://github.com/your_username/MyCloud.git  # (если свой репозиторий)
+или
+git clone https://github.com/lmartemyanova/MyCloud.git
+cd MyCloud/backend
+```
+
+### 3.3 Создать и активировать виртуальное окружение
+
+```bash
+python3 -m venv env
+source env/bin/activate
+```
+
+### 3.4 Установка зависимостей
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+Если не устанавливается psycopg2-binary:
+
+```bash
+sudo apt install -y libpq-dev build-essential python3-dev
+```
+
+## 4. Настройка .env
+
+Создать файл .env в корне backend/:
+
+```bash
+nano .env
+```
+
+Пример:
+
+```env
+SECRET_KEY=django-insecure-...
+
+DEBUG=False
+ALLOWED_HOSTS=your_domain_or_ip,127.0.0.1,localhost
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=your_db_name
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+
+ADMIN_USERNAME=admin
+ADMIN_FIRSTNAME=Admin
+ADMIN_LASTNAME=User
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=admin123
+
+MEDIA_ROOT=media
+MEDIA_URL=/media/
+
+BASE_STORAGE=storage
+```
+
+## 5. Создание базы данных
+
+### 5.1 Войти под postgres
+
+```bash
+sudo su postgres
+psql
+```
+
+### 5.2 Создать пользователя и БД
+
+```sql
+CREATE USER your_db_user WITH SUPERUSER;
+ALTER USER your_db_user WITH PASSWORD 'your_db_password';
+CREATE DATABASE your_db_name OWNER your_db_user;
+\q
+```
+
+```bash
+exit
+```
+
+## 6. Миграции и суперпользователь
+
+### 6.1 Выполнить миграции
+
+```bash
+cd backend
+source env/bin/activate
+python manage.py migrate
+```
+
+Суперпользователь создаётся автоматически, если переменные указаны в .env.
+
+## 7. Настройка Gunicorn + Nginx
+
+### 7.1 Установка и проверка
+
+```
+bash
+pip install gunicorn
+gunicorn --version
+sudo apt install nginx
+```
+
+### 7.2 Gunicorn systemd unit
+
+Создаём сервис:
+
+```bash
+sudo nano /etc/systemd/system/gunicorn.service
+```
+
+```ini
+[Unit]
+Description=Gunicorn for Django project
+After=network.target
+
+[Service]
+User=your_username
+Group=www-data
+WorkingDirectory=/home/your_username/your_project/backend
+ExecStart=/home/your_username/your_project/backend/env/bin/gunicorn \
+    --access-logfile - --workers=3 \
+    --bind unix:/home/your_username/your_project/backend/backend/project.sock \
+    backend.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Активировать сервис:
+
+```bash
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl enable gunicorn
+sudo systemctl start gunicorn
+sudo systemctl status gunicorn
+```
+
+### 7.3 Настройка Nginx
+
+Создать конфиг:
+
+```bash
+sudo nano /etc/nginx/sites-available/your_project
+```
+
+```nginx
+server {
+    listen 80;
+    server_name your_domain_or_ip;
+
+    location /static/ {
+        alias /home/your_username/your_project/backend/static/;
+    }
+
+    location /media/ {
+        alias /home/your_username/your_project/backend/media/;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/your_username/your_project/backend/backend/project.sock;
+    }
+}
+```
+
+## Символическая ссылка и перезапуск:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/your_project /etc/nginx/sites-enabled
+sudo systemctl restart nginx
+sudo systemctl status nginx
+```
+
+Разрешить фаервол:
+
+```bash
+sudo ufw allow 'Nginx Full'
+```
+
+Если ошибка 502 (Permission denied), дать права:
+
+```bash
+sudo chmod o+x /home
+sudo chmod o+x /home/your_username
+sudo chmod o+x /home/your_username/your_project
+sudo chmod o+x /home/your_username/your_project/backend
+sudo chmod o+x /home/your_username/your_project/backend/backend
+```
+
+Перезапуск:
+
+```bash
+sudo systemctl restart gunicorn
+sudo systemctl restart nginx
+```
+
+# 📦 Развёртывание фронтенда (Vite + React) на сервере
+
+## 1. 📁 Структура проекта
+
+Проект содержит подкаталог frontend, где расположен Vite-проект с React:
+
+```bash
+MyCloud/
+├── backend/        # Django backend
+├── frontend/       # Vite + React frontend
+└── README.md
+```
+
+## 2. 🚧 Сборка фронтенда (локально или на сервере)
+
+### 📌 Локально:
+
+Собрать на своей машине и перенести готовую сборку:
+
+```bash
+cd frontend
+npm install
+npm run build
+После этого появится папка dist/, содержащая production-сборку. Эту папку можно передать на сервер в любую подходящую директорию, например:
+```
+
+```bash
+scp -r dist your_username@your_server_ip:/home/your_username/MyCloud/frontend_dist
+```
+
+### 📌 Или собрать прямо на сервере:
+
+Переходим в папку фронтенда:
+
+```bash
+cd /home/your_username/MyCloud/frontend
+```
+
+Создаем .env файл с переменными окружения:
+
+```bash
+nano .env
+```
+
+Содержимое .env:
+
+```env
+VITE_API_URL=/api
+VITE_FRONTEND_URL=https://your-domain.com  # или IP с http
+```
+
+Запускаем сборку:
+
+```bash
+npm install
+npm run build
+# будет создана папка /home/your_username/MyCloud/frontend/dist
+```
+
+## 3. ⚙ Настройка Nginx для фронтенда
+
+Откроем конфиг:
+
+```bash
+sudo nano /etc/nginx/sites-available/mycloud
+```
+
+Добавим новый location для отдачи фронтенда:
+
+```nginx
+server {
+    listen 80;
+    server_name YOUR.SERVER.IP;
+
+    location /static/ {
+        alias /home/your_username/MyCloud/backend/static/;
+    }
+
+    location /media/ {
+        alias /home/your_username/MyCloud/backend/media/;
+    }
+
+    # 👇 frontend
+    location / {
+        root /home/your_username/MyCloud/frontend/dist;
+        index index.html;
+        try_files $uri /index.html;
+    }
+
+    # 👇 backend API
+    location /api/ {
+        include proxy_params;
+        proxy_pass http://unix:/home/your_username/MyCloud/backend/backend/project.sock;
+    }
+}
+```
+
+> Обратить внимание:
+
+> - root указывает на dist, не должен заканчиваться на /
+> - try_files $uri /index.html; — важно для работы React Router
+
+## 4. 🔄 Перезапуск Nginx
+
+```bash
+sudo nginx -t        # проверить конфиг
+sudo systemctl restart nginx
+```
+
+## 5. ✅ Проверка
+
+Переходим в браузере на IP-адрес сервера:
+
+- React-приложение отрисуется на /
+- Запросы к API идут по /api/...

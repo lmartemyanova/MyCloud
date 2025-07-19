@@ -10,6 +10,9 @@ import "../styles/storage.css";
 import FilePreview from "./FilePreview";
 import { preserveFileExtension } from "../utils/filename";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
+
 const FileCard = ({ file, onAction }) => {
     const [editingName, setEditingName] = useState(false);
     const [newName, setNewName] = useState(file.original_name);
@@ -19,7 +22,7 @@ const FileCard = ({ file, onAction }) => {
 
     const [previewOpen, setPreviewOpen] = useState(false);
 
-    const publicUrl = `http://localhost:5173/public/${file.unique_link}`;
+    const publicUrl = `${FRONTEND_BASE_URL}/public/${file.unique_link}`;
 
   
     const handleDelete = async () => {
@@ -34,7 +37,7 @@ const FileCard = ({ file, onAction }) => {
 
     const handleDownload = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/storage/download/${file.unique_link}/`, {
+        const res = await fetch(`${API_BASE_URL}/storage/download/${file.unique_link}/`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

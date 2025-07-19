@@ -17,16 +17,32 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("Не указаны все переменные для суперпользователя. Пропуск."))
             return
 
-        if not User.objects.filter(username=username).exists():
-            User.objects.create_superuser(
-                username=username,
-                email=email,
-                password=password,
-                first_name=first_name,
-                last_name=last_name,
-                is_staff=True,
-                is_superuser=True
-            )
+        user, created = User.objects.get_or_create(username=username, defaults={
+            "email": email,
+            "first_name": first_name,
+            "last_name": last_name
+        })
+
+        if created:
+            user.set_password(password)
+            user.is_staff = True
+            user.is_superuser = True
+            user.is_admin = True 
+            user.save()
             self.stdout.write(self.style.SUCCESS("Суперпользователь создан."))
         else:
-            self.stdout.write(self.style.NOTICE("Суперпользователь уже существует."))
+            updated = False
+            if not user.is_staff:
+                user.is_staff = True
+                updated = True
+            if not user.is_superuser:
+                user.is_superuser = True
+                updated = True
+            if not user.is_admin:
+                user.is_admin = True
+                updated = True
+            if updated:
+                user.save()
+                self.stdout.write(self.style.SUCCESS("Существующему пользователю присвоены права администратора."))
+            else:
+                self.stdout.write(self.style.NOTICE("Суперпользователь уже существует и имеет все права."))
